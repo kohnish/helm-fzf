@@ -48,11 +48,43 @@
          (helm-process-deferred-sentinel-hook
           process event (helm-default-directory)))))))
 
+(defvar helm-fzf-source-file
+  (helm-build-async-source "fzf"
+    :candidates-process 'helm-fzf--do-candidate-process-file
+    :filter-one-by-one 'identity
+    :requires-pattern 3
+    :action 'helm-find-file-or-marked
+    :candidate-number-limit 9999))
+
+(defun helm-fzf--do-candidate-process-file ()
+  (let* ((cmd-args(-filter 'identity (list helm-fzf-executable
+                                        "-d"
+                                        "/"
+                                        "-n"
+                                        "-1"
+                                        "-i"
+                                        "-f"
+                                        helm-pattern)))
+          (proc (apply 'start-file-process "helm-fzf" helm-buffer cmd-args)))
+    (prog1 proc
+      (set-process-sentinel
+        (get-buffer-process helm-buffer)
+        #'(lambda (process event)
+            (helm-process-deferred-sentinel-hook
+              process event (helm-default-directory)))))))
+
 ;;;###autoload
 (defun helm-fzf (directory)
   (interactive "D")
   (let ((default-directory directory))
     (helm :sources '(helm-fzf-source)
+          :buffer "*helm-fzf*")))
+
+;;;###autoload
+(defun helm-fzf-file (directory)
+  (interactive "D")
+  (let ((default-directory directory))
+    (helm :sources '(helm-fzf-source-file)
           :buffer "*helm-fzf*")))
 
 ;;;###autoload
