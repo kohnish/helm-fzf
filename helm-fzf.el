@@ -37,7 +37,7 @@
 
 (defun helm-fzf--do-candidate-process ()
   (let* ((cmd-args (-filter 'identity (list helm-fzf-executable
-                                            "--no-sort"
+                                            "-i"
                                             "-f"
                                             helm-pattern)))
          (proc (apply 'start-file-process "helm-fzf" helm-buffer cmd-args)))
@@ -55,6 +55,7 @@
     (helm :sources '(helm-fzf-source)
           :buffer "*helm-fzf*")))
 
+;;;###autoload
 (defun helm-fzf-project-root ()
   (interactive)
   (let ((default-directory (helm-fzf--project-root)))
